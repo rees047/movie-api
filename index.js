@@ -113,7 +113,7 @@ let movies = [
         release: 'June 16, 2000',
         runtime: '1h 34m',
         description: 'A science-fiction film that combines traditional animation with computer generated images, "Titan A.E." takes place in the distant future, after Earth has been obliterated by a mysterious alien race known as the Drej. Cale is a human teenager who has been given a mysterious map by his father, leading him on an unforgettable journey.',
-        director: ['Don Bluth', 'Gary Goldman', 'Art Vitello'], 
+        director: ['Don Bluth', 'Gary Goldman', 'Art Vitello', 'James Cameron'], 
         cast: ['Bill Pullman', 'Matt Damon', 'Drew Barrymore', 'John Leguizamo'],
         gross: '$36.8 million',
         budget: '$75 million',
@@ -155,7 +155,7 @@ app.get('/', (req, res) => {
 
 app.get('/documentation', (req, res) => {
     res.sendFile('/documentation.html', {
-        root: __dirname
+        root: __dirname + '/public'
     });
 });
 
@@ -181,9 +181,21 @@ app.get('/movies/:title/genre', (req, res) => {
 });
 
 app.get('/movies/director/:director', (req, res) => {
-    res.json(movies.find((director) => {
-        return movies.director === req.params.director
-    }));
+    let directed_movies = [];
+    
+    let movie = movies.find((movie) => {
+        for (let i = 0; i < movie.director.length; i++){
+            if (movie.director[i] === req.params.director){               
+                directed_movies.push(movie);
+            }
+        }        
+    });
+
+    if(directed_movies.length != 0 ){
+        res.status(201).json(directed_movies);
+    }else{
+        res.status(404).send('No movies found for this director');
+    }
 });
 
 app.post('/users/register', (req, res) => {
@@ -222,7 +234,7 @@ app.listen(8080, () =>{
     console.log('Your app is listening on port 8080');
 });
 
-app.use((err, req, rest, next) => {
+app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Uh-oh. Somethings not working right!');
 });
