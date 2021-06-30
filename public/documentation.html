@@ -66,7 +66,7 @@
                     <tr>
                         <td>4</td>
                         <td>Return data about a director (bio, birth year, death year) by name</td>
-                        <td>/movies/[director]</td>
+                        <td>/movies/director/[director]</td>
                         <td>GET</td>
                         <td>None</td>
                         <td>
@@ -107,7 +107,7 @@
                     <tr>
                         <td>6</td>
                         <td>Allow users to update their user info <small>(username)</small></td>
-                        <td>/users/[username]</td>
+                        <td>/users/[username]/update</td>
                         <td>PUT</td>
                         <td>None</td>
                         <td>A confirmation message updating the profile</td>
@@ -130,8 +130,8 @@
                     </tr>
                     <tr>
                         <td>9</td>
-                        <td>Allow existing users to deregister</td>
-                        <td>/users/deregister/[username]</td>
+                        <td>Allow existing users to delete</td>
+                        <td>/users/[username]/deregister</td>
                         <td>DELETE</td>
                         <td>None</td>
                         <td>A confirmation message that user has been successfully removed</td>

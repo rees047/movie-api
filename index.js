@@ -8,7 +8,7 @@ app.use(express.static(__dirname + '/public'));
 
 let movies = [
     {
-        title: 'Avengers: End Game',
+        title: 'Avengers End Game',
         genre: ['Action', 'Sci-Fi'],
         rating: 'PG-13',
         year: 2019,
@@ -164,8 +164,15 @@ app.get('/movies', (req, res) => {
 });
 
 app.get('/movies/:title', (req, res) => {
-    res.json(movies.find((movie) =>
-        { return movie.title === req.params.title }));
+    let movie = movies.find((movie) => {
+        return movie.title === req.params.title
+    });
+
+    if (movie){
+        res.status(201).json(movie);
+    }else{
+        res.status(404).send('Movie Not Found.');
+    }
 });
 
 app.get('/movies/:title/genre', (req, res) => {
@@ -199,33 +206,42 @@ app.get('/movies/director/:director', (req, res) => {
 });
 
 app.post('/users/register', (req, res) => {
-    res.send('Accept data about user registration');
+    let newUser = req.body;
+
+    if (!newUser.username) {
+        const message = 'Missing username in request body';
+        res.status(400).send(message);
+    } else {
+        res.status(201).send(req.body);
+    }
+
 });
 
-app.put('/users/register/:username', (req, res) => {
-    res.json(users.find((username) => {
+app.put('/users/:username/update', (req, res) => {
+    res.send('username is updated');
+    /*res.json(users.find((username) => {
         return users.username === req.params.username
-    }));
+    }));*/
 });
 
 app.put('/users/:username/favorites/add/:movie', (req, res) => {
-    res.json(users.find((username) => {
+    /*res.json(users.find((username) => {
         return users.username === req.params.username
-    }));
-    res.send('Movie Added!');
+    }));*/
+    res.send(req.params.movie + ' has been added to Favorites');
 });
 
 app.delete('/users/:username/favorites/remove/:movie', (req, res) => {
-    res.json(users.find((username) => {
+    /*res.json(users.find((username) => {
         return users.username === req.params.username
-    }));
-    res.send('Movie Deleted!');
+    }));*/
+    res.send(req.params.movie + ' has been removed from Favorites');
 });
 
-app.delete('/users/deregister/:username', (req, res) => {
-    res.json(users.find((username) => {
+app.delete('/users/:username/delete', (req, res) => {
+    /*res.json(users.find((username) => {
         return users.username === req.params.username
-    }));
+    }));*/
     res.send('User Profile Deleted!');
 });
 
