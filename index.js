@@ -4,6 +4,14 @@ const   express     = require('express'),
         Models      = require('./models.js');
 
 const app           = express();
+
+app.use(bodyParser.urlencoded({
+    extended : true
+}));
+let auth = require('./auth')(app);
+const passport = require('passport');
+require('./passport');
+
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
@@ -35,7 +43,7 @@ app.get('/documentation', (req, res) => {
     });
 });
 
-app.get('/movies', (req, res) => {
+app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
     movie_model.find()
     .then((movies) => {       
         res.status(201).json(movies);
@@ -46,7 +54,7 @@ app.get('/movies', (req, res) => {
     });
 });
 
-app.get('/movies/:title', (req, res) => {
+app.get('/movies/:title', passport.authenticate('jwt', { session: false }), (req, res) => {
     movie_model.findOne( {title : req.params.title })
     .then((movie) => {
         res.json(movie);
@@ -57,7 +65,7 @@ app.get('/movies/:title', (req, res) => {
     });
 });
 
-app.get('/movies/:title/genre', (req, res) => {
+app.get('/movies/:title/genre', passport.authenticate('jwt', { session: false }), (req, res) => {
     movie_model.findOne( {title : req.params.title })
     .then((movie) => {
         res.json(movie.title + ' :  ' + movie.genre.description);
@@ -68,7 +76,7 @@ app.get('/movies/:title/genre', (req, res) => {
     });
 });
 
-app.get('/movies/director/:director', (req, res) => {
+app.get('/movies/director/:director', passport.authenticate('jwt', { session: false }), (req, res) => {
     let directed_movies = [];
 
     movie_model.find( { 'director.name' : req.params.director })
@@ -81,7 +89,10 @@ app.get('/movies/director/:director', (req, res) => {
     });
 });
 
-app.post('/users/register', (req, res) => {
+app.post('/users', (req, res) => {
+    if(!req.body.username){
+        return res.status(400).send('username cannot be blank');
+    }
     user_model.findOne({ username: req.body.username})
     .then((user) =>{
         if(user){
@@ -109,7 +120,7 @@ app.post('/users/register', (req, res) => {
     });
 });
 
-app.get('/users', (req, res) =>{
+app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) =>{
     user_model.find()
     .then((users) => {
         res.status(201).json(users);
@@ -120,7 +131,7 @@ app.get('/users', (req, res) =>{
     });
 });
 
-app.get('/users/:username', (req, res) => {
+app.get('/users/:username', passport.authenticate('jwt', { session: false }), (req, res) => {
    user_model.findOne( {username : req.params.username })
    .then((user) => {
        res.json(user);
@@ -131,7 +142,7 @@ app.get('/users/:username', (req, res) => {
     });
 });
 
-app.put('/users/:username/update', (req, res) => {
+app.put('/users/:username', passport.authenticate('jwt', { session: false }), (req, res) => {
    user_model.findOneAndUpdate(
        { username : req.params.username },
        { $set :
@@ -152,7 +163,7 @@ app.put('/users/:username/update', (req, res) => {
        });
 });
 
-app.put('/users/:username/favorites/add/:movieID', (req, res) => {
+app.post('/users/:username/movies/:movieID', passport.authenticate('jwt', { session: false }), (req, res) => {
     user_model.findOneAndUpdate(
         { username : req.params.username },
         { $push : 
@@ -172,7 +183,7 @@ app.put('/users/:username/favorites/add/:movieID', (req, res) => {
     );
 });
 
-app.delete('/users/:username/favorites/remove/:movieID', (req, res) => {
+app.delete('/users/:username/movies/:movieID', passport.authenticate('jwt', { session: false }), (req, res) => {
     user_model.findOneAndUpdate(
         { username : req.params.username },
         { $pull : 
@@ -192,7 +203,7 @@ app.delete('/users/:username/favorites/remove/:movieID', (req, res) => {
     );
 });
 
-app.delete('/users/:username/delete', (req, res) => {
+app.delete('/users/:username', passport.authenticate('jwt', { session: false }), (req, res) => {
     user_model.findOneAndRemove({ username: req.params.username })
     .then((user) =>{
         if (!user){

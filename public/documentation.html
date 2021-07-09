@@ -82,7 +82,7 @@
                     <tr>
                         <td>5</td>
                         <td>Allow new users to register</td>
-                        <td>/users/register</td>
+                        <td>/users/</td>
                         <td>POST</td>
                         <td>
                             <p>A JSON object holding data about the user to add, structured like:</p>
@@ -106,32 +106,66 @@
                     </tr>
                     <tr>
                         <td>6</td>
-                        <td>Allow users to update their user info <small>(username)</small></td>
-                        <td>/users/[username]/update</td>
-                        <td>PUT</td>
+                        <td>Display all Users</td>
+                        <td>/users/</td>
                         <td>None</td>
-                        <td>A confirmation message updating the profile</td>
+                        <td>A JSON object holding data about all the users</td>
                     </tr>
                     <tr>
                         <td>7</td>
-                        <td>Allow users to add a movie to their list of favorites</td>
-                        <td>/users/[username]/favorites/add/[movieID]</td>
+                        <td>Return data <small>(username, first name, last name, email, password, birthday)</small> by username to the user</td>
+                        <td>/users/[username]</td>
+                        <td>GET</td>
+                        <td>None</td>
+                        <td>
+                            <p>A JSON object holding data about the movie to show, structured like:</p>
+                            <p><small> { <br>
+                                username: “jd01”, <br>
+                                firstname: "John"<br>
+                                lastname: "Doe"<br>
+                                email: "jd01@gijoe.com"<br>
+                                password: "jd0123"<br>
+                                birthdate: "1990-01-01" <br>
+                            }</small></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Allow users to update their user info <small>(username)</small></td>
+                        <td>/users/[username]</td>
                         <td>PUT</td>
+                        <td>None</td>
+                        <td><p>returns updated value</p>
+                            <p><small> { 
+                                firstname: "John"<br>
+                                lastname: "Doe"<br>
+                                email: "jd01@gijoe.com"<br>
+                                password: "jd0123"<br>
+                                birthdate: "1990-01-01" <br>
+                            }</small></p>
+                            <p>username CANNOT be changed</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Allow users to add a movie to their list of favorites</td>
+                        <td>/users/[username]/movies/[movieID]</td>
+                        <td>POST</td>
                         <td>None</td>
                         <td>A confirmation message that movie has been successfully added</td>
                     </tr>
                     <tr>
-                        <td>8</td>
+                        <td>10</td>
                         <td>Allow users to remove a movie from their list of favorites</td>
-                        <td>/users/[username]/favorites/remove/[movieID]</td>
+                        <td>/users/[username]/movies/[movieID]</td>
                         <td>DELETE</td>
                         <td>None</td>
                         <td>A confirmation message that movie has been successfully removed</td>
                     </tr>
                     <tr>
-                        <td>9</td>
+                        <td>11</td>
                         <td>Allow existing users to delete</td>
-                        <td>/users/[username]/deregister</td>
+                        <td>/users/[username]</td>
                         <td>DELETE</td>
                         <td>None</td>
                         <td>A confirmation message that user has been successfully removed</td>
