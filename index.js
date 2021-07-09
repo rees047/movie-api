@@ -9,19 +9,21 @@ app.use(express.static(__dirname + '/public'));
 
 const movie_model   = Models.Movie;
 const user_model    = Models.User;
-mongoose.connect('mongodb://localhost:27017/CineFilesDB',{
-    useNewUrlParser : true,
-    useUnifiedTopology : true
-});
 
 function connectToDB(){
-    mongoose.connect("mongodb://localhost/test"); //i have also tried 127.0.0.1
+    mongoose.connect("mongodb://localhost:27017/CineFilesDB", {
+        useNewUrlParser : true,
+        useUnifiedTopology : true,
+        useFindAndModify : false
+    }); //i have also tried 127.0.0.1
     db = mongoose.connection;
     db.on("error", console.error.bind(console, "connection error:"));
     db.once("open", function callback(){
         console.log("CONNECTED");
     });
 };
+
+connectToDB();
 
 app.get('/', (req, res) => {
     res.send('You are on the Home Page!');
@@ -45,45 +47,38 @@ app.get('/movies', (req, res) => {
 });
 
 app.get('/movies/:title', (req, res) => {
-    let movie = movies.find((movie) => {
-        return movie.title === req.params.title
+    movie_model.findOne( {title : req.params.title })
+    .then((movie) => {
+        res.json(movie);
+    })
+    .catch((error) => {
+         console.error(error);
+         res.status(500).send('Error: ' + error);
     });
-
-    if (movie){
-        res.status(201).json(movie);
-    }else{
-        res.status(404).send('Movie Not Found.');
-    }
 });
 
 app.get('/movies/:title/genre', (req, res) => {
-    let movie = movies.find((movie) => {
-        return movie.title === req.params.title
+    movie_model.findOne( {title : req.params.title })
+    .then((movie) => {
+        res.json(movie.title + ' :  ' + movie.genre.description);
+    })
+    .catch((error) => {
+         console.error(error);
+         res.status(500).send('Error: ' + error);
     });
-
-    if (movie){
-        res.status(201).send(movie.title + ' has genre of ' + movie.genre);
-    }else{
-        res.status(404).send('Movie Not Found.');
-    }
 });
 
 app.get('/movies/director/:director', (req, res) => {
     let directed_movies = [];
-    
-    let movie = movies.find((movie) => {
-        for (let i = 0; i < movie.director.length; i++){
-            if (movie.director[i] === req.params.director){               
-                directed_movies.push(movie);
-            }
-        }        
-    });
 
-    if(directed_movies.length != 0 ){
-        res.status(201).json(directed_movies);
-    }else{
-        res.status(404).send('No movies found for this director');
-    }
+    movie_model.find( { 'director.name' : req.params.director })
+    .then((movies) => {
+        res.status(201).json(movies);
+    })
+    .catch((error) => {
+        console.error(error);
+        res.status(500).send('Error: ' + error);
+    });
 });
 
 app.post('/users/register', (req, res) => {
@@ -140,11 +135,10 @@ app.put('/users/:username/update', (req, res) => {
    user_model.findOneAndUpdate(
        { username : req.params.username },
        { $set :
-            {
-                username: req.body.username,
+            {  
                 password: req.body.password,
                 email: req.body.email,
-                birthdate : req.body.birthday
+                birthdate : req.body.birthdate
             }
        },
        { new: true }, //this line makes sure that the updated doc is returned
