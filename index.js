@@ -8,8 +8,25 @@ const app           = express();
 app.use(bodyParser.urlencoded({
     extended : true
 }));
-let auth = require('./auth')(app);
+
+const cors  = require('cors');
+app.use(cors());
+
+let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+app.use(cors({
+    origin: (origin, callback) =< {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1){ //if a specific origin isn't found on list of allowed origins
+            let message =  'the CORS policy for this application doesn\'t allow access from origin ' + origin;
+            return callback(new Error(message), false;
+        }
+        return callback(null,true);
+    }
+}));
+
+let auth    = require('./auth')(app);
 const passport = require('passport');
+const { check, validationResult } = require('express-validator');
 require('./passport');
 
 app.use(bodyParser.json());
@@ -89,35 +106,53 @@ app.get('/movies/director/:director', passport.authenticate('jwt', { session: fa
     });
 });
 
-app.post('/users', (req, res) => {
-    if(!req.body.username){
-        return res.status(400).send('username cannot be blank');
-    }
-    user_model.findOne({ username: req.body.username})
-    .then((user) =>{
-        if(user){
-            return res.status(400).send(req.body.username + ' already exists');
-        }else{
-            user_model
-            .create({
-                username: req.body.username,
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                email: req.body.email,
-                password: req.body.password,
-                birthdate: req.body.birthdate,
-            })
-            .then((user) => { res.status(201).json(user) })
-            .catch((error) => {
-                console.error(error);
-                res.status(500).send('Error: ' + error);
-            });
+app.post('/users', 
+    //validation logic here for request
+    //you can either use a chain of methods like .not().isEmpty() which means "opposite of isEmpty" in plain english "is not empty"
+    // or use .isLength({min: 5}) which means minimum value of 5 characters are only allowed
+    [
+        check('Username', 'Username is required').not().isEmpty(),
+        check('Username', 'Minimum Length is 5').isLength({min: 5}),
+        check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
+        check('Password', 'Password is required').not().isEmpty(),
+        check('Password', 'Minimum Length is 5').isLength({min: 5}),
+        check('Email', 'Email is required').not().isEmpty(),
+        check('Email', 'Email Length is 5').isLength({min: 5}),
+        check('Email', 'Email is invalid').isEmail()
+    ], (req, res) => {
+        //check the validation object for errors
+        let errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            return res.status(422).json({ errors: errors.array() });
         }
-    })
-    .catch((error) => {
-        console.error(error);
-        res.status(500).send('Error: ' + error);
-    });
+
+        let hashedPassword = user_model.hashPassword(req.body.Password);
+        user_model.findOne({ username: req.body.username}) //search to see if a user with the requested username already exists
+        .then((user) =>{
+            if(user){ //is user is found, send a response that it already exists
+            return res.status(400).send(req.body.username + ' already exists');
+            }else{
+                user_model
+                .create({
+                    username: req.body.username,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
+                    email: req.body.email,
+                    password: hashedPassword,
+                    birthdate: req.body.birthdate,
+                })
+                .then((user) => { res.status(201).json(user) })
+                .catch((error) => {
+                    console.error(error);
+                    res.status(500).send('Error: ' + error);
+                });
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(500).send('Error: ' + error);
+        });
 });
 
 app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) =>{
@@ -142,25 +177,35 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), (r
     });
 });
 
-app.put('/users/:username', passport.authenticate('jwt', { session: false }), (req, res) => {
-   user_model.findOneAndUpdate(
-       { username : req.params.username },
-       { $set :
-            {  
-                password: req.body.password,
-                email: req.body.email,
-                birthdate : req.body.birthdate
-            }
-       },
-       { new: true }, //this line makes sure that the updated doc is returned
-       (err, updatedUser) => {
-           if (err){
-               console.error(err);
-               res.status(500).send('Error: ' + error);
-           }else{
-               res.json(updatedUser);
-           }
-       });
+app.put('/users/:username', passport.authenticate('jwt', { session: false }),
+    [
+        check('Username', 'Username is required').not().isEmpty(),
+        check('Username', 'Minimum Length is 5').isLength({min: 5}),
+        check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
+        check('Password', 'Password is required').not().isEmpty(),
+        check('Password', 'Minimum Length is 5').isLength({min: 5}),
+        check('Email', 'Email is required').not().isEmpty(),
+        check('Email', 'Email Length is 5').isLength({min: 5}),
+        check('Email', 'Email is invalid').isEmail()
+    ](req, res) => {
+        user_model.findOneAndUpdate(
+            { username : req.params.username },
+            { $set :
+                    {  
+                        password: req.body.password,
+                        email: req.body.email,
+                        birthdate : req.body.birthdate
+                    }
+            },
+            { new: true }, //this line makes sure that the updated doc is returned
+            (err, updatedUser) => {
+                if (err){
+                    console.error(err);
+                    res.status(500).send('Error: ' + error);
+                }else{
+                    res.json(updatedUser);
+                }
+            });
 });
 
 app.post('/users/:username/movies/:movieID', passport.authenticate('jwt', { session: false }), (req, res) => {
