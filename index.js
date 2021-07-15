@@ -178,8 +178,7 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), (r
     });
 });
 
-app.put('/users/:username', passport.authenticate('jwt', { session: false }),
-    [
+app.put('/users/:username', [
         check('Username', 'Username is required').not().isEmpty(),
         check('Username', 'Minimum Length is 5').isLength({min: 5}),
         check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
@@ -188,7 +187,8 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
         check('Email', 'Email is required').not().isEmpty(),
         check('Email', 'Email Length is 5').isLength({min: 5}),
         check('Email', 'Email is invalid').isEmail()
-    ](req, res) => {
+    ],(passport.authenticate('jwt', { session: false }),
+    req, res) => {
         user_model.findOneAndUpdate(
             { username : req.params.username },
             { $set :
