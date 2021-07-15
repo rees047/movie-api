@@ -14,7 +14,7 @@ app.use(cors());
 
 let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
 app.use(cors({
-    origin: (origin, callback) =< {
+    origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1){ //if a specific origin isn't found on list of allowed origins
             let message =  'the CORS policy for this application doesn\'t allow access from origin ' + origin;
