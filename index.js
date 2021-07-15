@@ -189,11 +189,18 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
         check('Email', 'Email Length is 5').isLength({min: 5}),
         check('Email', 'Email is invalid').isEmail()
     ], (req, res) => {
+        let errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            return res.status(422).json({ errors: errors.array() });
+        }
+
+        let hashedPassword = user_model.hashPassword(req.body.Password);
         user_model.findOneAndUpdate(
             { username : req.params.username },
             { $set :
                     {  
-                        password: req.body.password,
+                        password: hashedPassword,
                         email: req.body.email,
                         birthdate : req.body.birthdate
                     }
