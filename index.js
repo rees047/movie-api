@@ -167,8 +167,19 @@ app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) =
     });
 });
 
-app.get('/users/:username', passport.authenticate('jwt', { session: false }),
-	[
+app.get('/users/:username', passport.authenticate('jwt', { session: false }), (req, res) => {
+   user_model.findOne( {username : req.params.username })
+   .then((user) => {
+       res.json(user);
+   })
+   .catch((error) => {
+        console.error(error);
+        res.status(500).send('Error: ' + error);
+    });
+});
+
+app.put('/users/:username', (passport.authenticate('jwt', { session: false }),
+    [
         check('Username', 'Username is required').not().isEmpty(),
         check('Username', 'Minimum Length is 5').isLength({min: 5}),
         check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
@@ -177,19 +188,7 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }),
         check('Email', 'Email is required').not().isEmpty(),
         check('Email', 'Email Length is 5').isLength({min: 5}),
         check('Email', 'Email is invalid').isEmail()
-	], (req, res) => {
-			user_model.findOne( {username : req.params.username })
-			.then((user) => {
-				res.json(user);
-			})
-		   .catch((error) => {
-				console.error(error);
-				res.status(500).send('Error: ' + error);
-			});
-});
-
-app.put('/users/:username',(passport.authenticate('jwt', { session: false }),
-    req, res) => {
+    ], (req, res) => {
         user_model.findOneAndUpdate(
             { username : req.params.username },
             { $set :
