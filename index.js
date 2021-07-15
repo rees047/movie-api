@@ -178,7 +178,7 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), (r
     });
 });
 
-app.put('/users/:username', (passport.authenticate('jwt', { session: false }),
+app.put('/users/:username', passport.authenticate('jwt', { session: false }),
     [
         check('Username', 'Username is required').not().isEmpty(),
         check('Username', 'Minimum Length is 5').isLength({min: 5}),
