@@ -112,14 +112,20 @@ app.post('/users',
     //you can either use a chain of methods like .not().isEmpty() which means "opposite of isEmpty" in plain english "is not empty"
     // or use .isLength({min: 5}) which means minimum value of 5 characters are only allowed
     [
-        check('Username', 'Username is required').not().isEmpty(),
-        check('Username', 'Minimum Length is 5').isLength({min: 5}),
-        check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
-        check('Password', 'Password is required').not().isEmpty(),
-        check('Password', 'Minimum Length is 5').isLength({min: 5}),
-        check('Email', 'Email is required').not().isEmpty(),
-        check('Email', 'Email Length is 5').isLength({min: 5}),
-        check('Email', 'Email is invalid').isEmail()
+        check('username', 'Username is required').not().isEmpty(),
+        check('username', 'Minimum Length is 5').isLength({min: 5}),
+        check('username', 'Username must only be alphanumeric characters').isAlphanumeric(),
+        check('firstname', 'First Name is required').not().isEmpty(),
+        check('firstname', 'Minimum Length is 2').isLength({min: 2}),
+        check('firstname', 'First Name must only be alpha characters').isAlpha(),
+        check('lastname', 'Last Name is required').not().isEmpty(),
+        check('lastname', 'Minimum Length is 2').isLength({min: 2}),
+        check('lastname', 'Last Name must only be alpha characters').isAlpha(),
+        check('password', 'Password is required').not().isEmpty(),
+        check('password', 'Minimum Length is 5').isLength({min: 5}),
+        check('email', 'Email is required').not().isEmpty(),
+        check('email', 'Email Length is 5').isLength({min: 5}),
+        check('email', 'Email is invalid').isEmail()
     ], (req, res) => {
         //check the validation object for errors
         let errors = validationResult(req);
@@ -128,7 +134,7 @@ app.post('/users',
             return res.status(422).json({ errors: errors.array() });
         }
 
-        let hashedPassword = user_model.hashPassword(req.body.Password);
+        let hashedPassword = user_model.hashPassword(req.body.password);
         user_model.findOne({ username: req.body.username}) //search to see if a user with the requested username already exists
         .then((user) =>{
             if(user){ //is user is found, send a response that it already exists
@@ -180,14 +186,14 @@ app.get('/users/:username', passport.authenticate('jwt', { session: false }), (r
 
 app.put('/users/:username', passport.authenticate('jwt', { session: false }),
     [
-        check('Username', 'Username is required').not().isEmpty(),
-        check('Username', 'Minimum Length is 5').isLength({min: 5}),
-        check('Username', 'Username must only be alphanumeric characters').isAlphanumeric(),
-        check('Password', 'Password is required').not().isEmpty(),
-        check('Password', 'Minimum Length is 5').isLength({min: 5}),
-        check('Email', 'Email is required').not().isEmpty(),
-        check('Email', 'Email Length is 5').isLength({min: 5}),
-        check('Email', 'Email is invalid').isEmail()
+        check('username', 'Username is required').not().isEmpty(),
+        check('username', 'Minimum Length is 5').isLength({min: 5}),
+        check('username', 'Username must only be alphanumeric characters').isAlphanumeric(),
+        check('password', 'Password is required').not().isEmpty(),
+        check('password', 'Minimum Length is 5').isLength({min: 5}),
+        check('email', 'Email is required').not().isEmpty(),
+        check('email', 'Email Length is 5').isLength({min: 5}),
+        check('email', 'Email is invalid').isEmail()
     ], (req, res) => {
         let errors = validationResult(req);
 
@@ -202,7 +208,6 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
                     {  
                         password: hashedPassword,
                         email: req.body.email,
-                        birthdate : req.body.birthdate
                     }
             },
             { new: true }, //this line makes sure that the updated doc is returned
