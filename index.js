@@ -201,7 +201,7 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
             return res.status(422).json({ errors: errors.array() });
         }
 
-        let hashedPassword = user_model.hashPassword(req.body.Password);
+        let hashedPassword = user_model.hashPassword(req.body.password);
         user_model.findOneAndUpdate(
             { username : req.params.username },
             { $set :
