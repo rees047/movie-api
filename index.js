@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({
 const cors  = require('cors');
 app.use(cors());
 
-let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'http://testsite.com'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
@@ -36,8 +36,8 @@ const movie_model   = Models.Movie;
 const user_model    = Models.User;
 
 function connectToDB(){
-    //mongoose.connect("mongodb://localhost:27017/CineFilesDB", { //localhost db connection
-	mongoose.connect(process.env.CONNECTION_URI, { //connection_uri is declared in heroku config vars: connection_uri = mongodb+srv://Admin-1:rOute125!@main-cluster.7ilmh.mongodb.net/CineFilesDB?retryWrites=true&w=majority
+    mongoose.connect("mongodb://localhost:27017/CineFilesDB", { //localhost db connection
+	//mongoose.connect(process.env.CONNECTION_URI, { //connection_uri is declared in heroku config vars: connection_uri = mongodb+srv://Admin-1:rOute125!@main-cluster.7ilmh.mongodb.net/CineFilesDB?retryWrites=true&w=majority
         useNewUrlParser : true,
         useUnifiedTopology : true,
         useFindAndModify : false
@@ -61,7 +61,8 @@ app.get('/documentation', (req, res) => {
     });
 });
 
-app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+//app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/movies', (req, res) => {
     movie_model.find()
     .then((movies) => {       
         res.status(201).json(movies);
