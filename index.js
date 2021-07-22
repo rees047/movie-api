@@ -36,8 +36,8 @@ const movie_model   = Models.Movie;
 const user_model    = Models.User;
 
 function connectToDB(){
-    mongoose.connect("mongodb://localhost:27017/CineFilesDB", { //localhost db connection
-	//mongoose.connect(process.env.CONNECTION_URI, { //connection_uri is declared in heroku config vars: connection_uri = mongodb+srv://Admin-1:rOute125!@main-cluster.7ilmh.mongodb.net/CineFilesDB?retryWrites=true&w=majority
+    //mongoose.connect("mongodb://localhost:27017/CineFilesDB", { //localhost db connection
+	mongoose.connect(process.env.CONNECTION_URI, { //connection_uri is declared in heroku config vars: connection_uri = mongodb+srv://Admin-1:rOute125!@main-cluster.7ilmh.mongodb.net/CineFilesDB?retryWrites=true&w=majority
         useNewUrlParser : true,
         useUnifiedTopology : true,
         useFindAndModify : false
