@@ -5,6 +5,7 @@ const   express     = require('express'),
 
 const app           = express();
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended : true
 }));
@@ -29,9 +30,6 @@ const passport = require('passport');
 const { check, validationResult } = require('express-validator');
 require('./passport');
 
-app.use(bodyParser.json());
-app.use(express.static(__dirname + '/public'));
-
 const movie_model   = Models.Movie;
 const user_model    = Models.User;
 
@@ -51,6 +49,8 @@ function connectToDB(){
 
 connectToDB();
 
+app.use(express.static(__dirname + '/public'));
+
 app.get('/', (req, res) => {
     res.send('You are on the Home Page!');
 });
@@ -61,8 +61,8 @@ app.get('/documentation', (req, res) => {
     });
 });
 
-//app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
-app.get('/movies', (req, res) => {
+app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+//app.get('/movies', (req, res) => {
     movie_model.find()
     .then((movies) => {       
         res.status(201).json(movies);
@@ -73,6 +73,7 @@ app.get('/movies', (req, res) => {
     });
 });
 
+//find movies by MovieTitle
 app.get('/movies/:title', passport.authenticate('jwt', { session: false }), (req, res) => {
     movie_model.findOne( {title : req.params.title })
     .then((movie) => {
@@ -95,6 +96,29 @@ app.get('/movies/:title/genre', passport.authenticate('jwt', { session: false })
     });
 });
 
+//find movies by MovieID
+/*app.get('/movies/:movieID', passport.authenticate('jwt', { session: false }), (req, res) => {    
+    movie_model.findById(req.params.movieID)
+    .then((movie) => {
+        res.json(movie);
+    })
+    .catch((error) => {
+         console.error(error);
+         res.status(500).send('Error: ' + error);
+    });
+});
+
+app.get('/movies/:movieID/genre', passport.authenticate('jwt', { session: false }), (req, res) => {
+    movie_model.findById(req.params.movieID)
+    .then((movie) => {
+        res.json(movie.title + ' :  ' + movie.genre.description);
+    })
+    .catch((error) => {
+         console.error(error);
+         res.status(500).send('Error: ' + error);
+    });
+}); */
+
 app.get('/movies/director/:director', passport.authenticate('jwt', { session: false }), (req, res) => {
     let directed_movies = [];
 
@@ -108,7 +132,7 @@ app.get('/movies/director/:director', passport.authenticate('jwt', { session: fa
     });
 });
 
-app.post('/users', 
+app.post('/register', 
     //validation logic here for request
     //you can either use a chain of methods like .not().isEmpty() which means "opposite of isEmpty" in plain english "is not empty"
     // or use .isLength({min: 5}) which means minimum value of 5 characters are only allowed
@@ -276,7 +300,6 @@ app.delete('/users/:username', passport.authenticate('jwt', { session: false }),
         res.status(500).send('Error: ' + error);
     });
 });
-
 
 /*app.listen(8080, () =>{
     console.log('Your app is listening on port 8080');

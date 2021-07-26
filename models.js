@@ -1,3 +1,4 @@
+//const mongoose = require('mongoose').set('debug', true), //shows error debugging in mongoose
 const mongoose = require('mongoose'),
       bcrypt = require('bcrypt');
 
