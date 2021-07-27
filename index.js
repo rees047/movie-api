@@ -96,6 +96,19 @@ app.get('/movies/:title/genre', passport.authenticate('jwt', { session: false })
     });
 });
 
+app.get('/movies/genre/:genrename', passport.authenticate('jwt', { session: false }), (req, res) => {
+    let genre_movies = [];
+
+    movie_model.find( { 'genre.name' : req.params.genrename })
+    .then((movies) => {
+        res.status(201).json(movies);
+    })
+    .catch((error) => {
+        console.error(error);
+        res.status(500).send('Error: ' + error);
+    });
+});
+
 //find movies by MovieID
 /*app.get('/movies/:movieID', passport.authenticate('jwt', { session: false }), (req, res) => {    
     movie_model.findById(req.params.movieID)
