@@ -137,33 +137,41 @@ app.post('/register',
     //you can either use a chain of methods like .not().isEmpty() which means "opposite of isEmpty" in plain english "is not empty"
     // or use .isLength({min: 5}) which means minimum value of 5 characters are only allowed
     [
-        check('username', 'Username is required').not().isEmpty(),
-        check('username', 'Minimum Length is 5').isLength({min: 5}),
-        check('username', 'Username must only be alphanumeric characters').isAlphanumeric(),
-        check('firstname', 'First Name is required').not().isEmpty(),
-        check('firstname', 'Minimum Length is 2').isLength({min: 2}),
-        check('firstname', 'First Name must only be alpha characters').isAlpha(),
-        check('lastname', 'Last Name is required').not().isEmpty(),
-        check('lastname', 'Minimum Length is 2').isLength({min: 2}),
-        check('lastname', 'Last Name must only be alpha characters').isAlpha(),
-        check('password', 'Password is required').not().isEmpty(),
-        check('password', 'Minimum Length is 5').isLength({min: 5}),
-        check('email', 'Email is required').not().isEmpty(),
-        check('email', 'Email Length is 5').isLength({min: 5}),
-        check('email', 'Email is invalid').isEmail()
+        check('username')
+            .trim().not().isEmpty().withMessage('Username must not be blank')
+            .isLength({min: 5}).withMessage('Username Minimum Length is 5 Characters')
+            .isAlphanumeric().withMessage('Username must be Letters and Numbers Only'),
+        check('password')
+            .trim().not().isEmpty().withMessage('Password must not be blank')
+            .isLength({min: 5}).withMessage('Password Minimum Length is 5 Characters')
+            .isAlphanumeric().withMessage('Password must be Letters and Numbers Only'),
+        check('firstname')
+            .trim().not().isEmpty().withMessage('First Name must not be blank')
+            .isLength({min: 2}).withMessage('First Name Minimum Length is 2 Characters')
+            .isAlpha().withMessage('First Name must be Letters Only'),    
+        check('lastname')
+            .trim().not().isEmpty().withMessage('Last Name must not be blank')
+            .isLength({min: 2}).withMessage('Last Name Minimum Length is 2 Characters')
+            .isAlpha().withMessage('Last Name must be Letters Only'),             
+        check('email')
+            .trim().normalizeEmail().not().isEmpty().withMessage('Email must not be blank')
+            .isEmail().withMessage('Email Adddress is Invalid'),
+        check('birthdate')
+            .isISO8601().toDate().withMessage('Birthdate is Invalid')
     ], (req, res) => {
+
         //check the validation object for errors
         let errors = validationResult(req);
 
         if(!errors.isEmpty()){
-            return res.status(422).json({ errors: errors.array() });
+            return res.status(422).json({ serverResponse: errors.array() });
         }
 
         let hashedPassword = user_model.hashPassword(req.body.password);
         user_model.findOne({ username: req.body.username}) //search to see if a user with the requested username already exists
         .then((user) =>{
             if(user){ //is user is found, send a response that it already exists
-            return res.status(400).send(req.body.username + ' already exists');
+            return res.status(400).send({ serverResponse : [{ msg : req.body.username + ' already exists'} ] });
             }else{
                 user_model
                 .create({
@@ -174,7 +182,7 @@ app.post('/register',
                     password: hashedPassword,
                     birthdate: req.body.birthdate,
                 })
-                .then((user) => { res.status(201).json(user) })
+                .then((user) => { res.status(201).json({ serverResponse : [{ msg : req.body.username + ' has been registered successfully'} ] }) })
                 .catch((error) => {
                     console.error(error);
                     res.status(500).send('Error: ' + error);
