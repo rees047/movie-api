@@ -34,6 +34,8 @@ const movie_model   = Models.Movie;
 const user_model    = Models.User;
 
 function connectToDB(){
+    //mongoose.connect("mongodb://localhost:27017/CineFilesDB", { //localhost db connection
+	mongoose.connect(process.env.CONNECTION_URI, { //connection_uri is declared in heroku config vars: connection_uri = mongodb+srv://Admin-1:rOute125!@main-cluster.7ilmh.mongodb.net/CineFilesDB?retryWrites=true&w=majority
         useNewUrlParser : true,
         useUnifiedTopology : true,
         useFindAndModify : false
@@ -95,8 +97,6 @@ app.get('/movies/:title/genre', passport.authenticate('jwt', { session: false })
 });
 
 app.get('/movies/genre/:genrename', passport.authenticate('jwt', { session: false }), (req, res) => {
-    let genre_movies = [];
-
     movie_model.find( { 'genre.name' : req.params.genrename })
     .then((movies) => {
         res.status(201).json(movies);
@@ -131,11 +131,8 @@ app.get('/movies/:movieID/genre', passport.authenticate('jwt', { session: false 
 }); */
 
 app.get('/director/:director', passport.authenticate('jwt', { session: false }), (req, res) => {
-    let directed_movies = [];
-    
     movie_model.find( { 'director.name' : req.params.director })
     .then((movies) => {
-       
         res.status(201).json(movies);
     })
     .catch((error) => {
@@ -234,7 +231,11 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
         check('firstname')
             .trim().not().isEmpty().withMessage('First Name must not be blank')
             .isLength({min: 2}).withMessage('First Name Minimum Length is 2 Characters')
-            .isAlpha().withMessage('First Name must be Letters Only')
+            .isAlpha().withMessage('First Name must be Letters Only'),
+        check('lastname')
+            .trim().not().isEmpty().withMessage('Last Name must not be blank')
+            .isLength({min: 2}).withMessage('Last Name Minimum Length is 2 Characters')
+            .isAlpha().withMessage('Last Name must be Letters Only')
         //check('username', 'Username is required').not().isEmpty(),
         //check('username', 'Minimum Length is 5').isLength({min: 5}),
         //check('username', 'Username must only be alphanumeric characters').isAlphanumeric(),
@@ -244,6 +245,7 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
         //check('email', 'Email Length is 5').isLength({min: 5}),
         //check('email', 'Email is invalid').isEmail()
     ], (req, res) => {
+        //console.log(req.params);
         let errors = validationResult(req);
 
         if(!errors.isEmpty()){
@@ -255,8 +257,8 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
             { username : req.params.username },
             { $set :
                     {  
-                        firstname: req.params.firstname,
-                        //email: req.body.email,
+                        firstname: req.query.firstname,
+                        lastname: req.query.lastname,
                     }
             },
             { new: true }, //this line makes sure that the updated doc is returned
@@ -271,8 +273,7 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
 });
 
 app.post('/users/:username/movies/:movietitle', passport.authenticate('jwt', { session: false }), (req, res) => {
-    console.log(req.params);
-    user_model.findOneAndUpdate(
+        user_model.findOneAndUpdate(
         { username : req.params.username },
         { $push : 
             {
