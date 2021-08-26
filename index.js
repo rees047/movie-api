@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 const cors  = require('cors');
 app.use(cors());
 
-let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'http://testsite.com', 'https://cinefiles.netlify.app', 'http://localhost:4200'];
+let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'http://testsite.com', 'https://cinefiles.netlify.app', 'http://localhost:4200', 'https://rees047.github.io'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
