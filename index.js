@@ -247,6 +247,19 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
     ], (req, res) => {
         //console.log(req.params);
         let errors = validationResult(req);
+        let inputFName = '';
+        let inputLName = '';
+       
+        if(JSON.stringify(req.query) === '{}'){
+            inputFName = req.body.firstname;
+            inputLName = req.body.lastname
+            //console.log('empty');
+       }else{
+           
+            inputFName = req.query.firstname;
+            inputLName = req.query.lastname
+            //console.log('not empty');
+       }
 
         if(!errors.isEmpty()){
             return res.status(422).json({ errors: errors.array() });
@@ -257,8 +270,8 @@ app.put('/users/:username', passport.authenticate('jwt', { session: false }),
             { username : req.params.username },
             { $set :
                     {  
-                        firstname: req.query.firstname,
-                        lastname: req.query.lastname,
+                        firstname: inputFName,
+                        lastname: inputLName,
                     }
             },
             { new: true }, //this line makes sure that the updated doc is returned
