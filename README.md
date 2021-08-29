@@ -13,6 +13,8 @@ Users can create profiles, delete profile and add and/or delete favorite movies 
 Endpoints are used to access and return the requested data.
 The endpoints are tested using postman to make sure they are working
 
+API is being hosted using heroku
+
 Endpoints are:  
 [post]    register:               /register  
 [get]     get all movies:         /movies  
